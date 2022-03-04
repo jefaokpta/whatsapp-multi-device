@@ -1,6 +1,7 @@
 import makeWASocket, {DisconnectReason, fetchLatestBaileysVersion, useSingleFileAuthState} from "@adiwajshing/baileys";
 import {Boom} from "@hapi/boom";
 import {authFileDuplicate, authFileRestore} from "../util/authHandler";
+import {sendQrCode} from "../util/qrCodeHandle";
 
 
 const { state, saveState } = useSingleFileAuthState(authFileRestore())
@@ -18,7 +19,9 @@ export async function connectToWhatsApp() {
     /** connection state has been updated -- WS closed, opened, connecting etc. */
     sock.ev.on('connection.update', (update) => {
         const {connection, lastDisconnect, qr} = update
-        console.log('QRCODE AQUI', qr)
+        if(qr != null) {
+            sendQrCode(qr)
+        }
         console.log('ESTADO DA CONEXAO ', connection)
         if (connection === 'close') {
             const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
@@ -36,12 +39,19 @@ export async function connectToWhatsApp() {
     })
 
     sock.ev.on('messages.upsert',  m => {
+        console.log('Mensagem recebida UPSERT ')
         console.log(JSON.stringify(m, undefined, 2))
         const message  = m.messages[0]
         // if(!message.key.fromMe){
         //     console.log('respondendo para ', m.messages[0].key.remoteJid)
         //     sock.sendMessage(m.messages[0].key.remoteJid!, {text: 'Faaala José!'})
         // }
+    })
+
+    /** ATUALIZACAO DE STATUS DE MSG ENVIADA */
+    sock.ev.on('messages.update', m => {
+        console.log('RECEBENDO messages.update')
+        console.log(m)
     })
 
     /** ATUALIZA ARQUIVO AUTHS */
@@ -51,13 +61,7 @@ export async function connectToWhatsApp() {
         authFileDuplicate()
     })
 
-    // ATUALIZACAO DE STATUS DA MSG
-    sock.ev.on('messages.update', m => {
-        console.log('RECEBENDO messages.update')
-        console.log(m)
-    })
-
-    // EVENTOS DISPONIVEIS
+    /** EVENTOS DISPONIVEIS - INUTEIS POR ENQUANTO */
     /** set chats (history sync), chats are reverse chronologically sorted */
     sock.ev.on('chats.set', item => {
         console.log('RECEBENDO chats.set')
