@@ -1,13 +1,12 @@
 import {proto} from "@adiwajshing/baileys";
 import IMessage = proto.IMessage;
 import IMessageKey = proto.IMessageKey;
-import WebMessageInfoStatus = proto.WebMessageInfo.WebMessageInfoStatus;
 
 export class MessageData {
     key: IMessageKey
     message: IMessage | null | undefined
-    messageTimestamp: number | Long
-    status: WebMessageInfoStatus
+    messageTimestamp: number | Long | null | undefined
+    status: number
     company: string | undefined
     instanceId: string | undefined
     mediaMessage: boolean
@@ -20,8 +19,8 @@ export class MessageData {
 
     constructor(key: proto.IMessageKey,
                 message: proto.IMessage | null | undefined,
-                messageTimestamp: number | Long,
-                status: proto.WebMessageInfo.WebMessageInfoStatus | 0,
+                messageTimestamp: number|Long|null|undefined,
+                status: number,
                 company: string | undefined,
                 instanceId: string | undefined,
                 mediaMessage: boolean,

@@ -3,11 +3,12 @@ import {mediaFolder} from "../static/staticVar";
 
 const companyId = process.env.COMPANY || '12'
 const authFilePath = `./auth_info_multi-${companyId}.json`
+const authFilePathBkp = `./${mediaFolder}/auths/auth_info_multi-${companyId}.json`
 
 export function authFileRestore() {
     if (!fs.existsSync(authFilePath)) {
         try {
-            fs.copyFileSync(`${mediaFolder}/auths/auth_info_multi-${companyId}.json`, authFilePath)
+            fs.copyFileSync(authFilePathBkp, authFilePath)
             console.log('ARQUIVO AUTH RESTAURADO')
         } catch (error) {
             console.log('NAO FOI POSSIVEL RESTAURAR ARQUIVO AUTH ', error)
@@ -17,8 +18,19 @@ export function authFileRestore() {
 }
 
 export function authFileDuplicate() {
-    fs.copyFile(`./auth_info_multi-${companyId}.json`, `./${mediaFolder}/auths/auth_info_multi-${companyId}.json`, (err) => {
+    fs.copyFile(authFilePath, authFilePathBkp, (err) => {
         if (err) console.log('ERRO AO COPIAR AUTH FILE', err)
         else console.log('AUTH FILE COPIADO.');
+    });
+}
+
+export function deleteAuthFile() {
+    fs.unlink(authFilePath, (err) => {
+        if (err) console.log('ERRO AO DELETAR AUTH FILE', err)
+        else console.log('AUTH FILE PRINCIPAL DELETADO.');
+    });
+    fs.unlink(authFilePathBkp, (err) => {
+        if (err) console.log('ERRO AO DELETAR AUTH FILE', err)
+        else console.log('AUTH FILE BACKUP DELETADO.');
     });
 }

@@ -1,20 +1,18 @@
 import makeWASocket, {DisconnectReason, fetchLatestBaileysVersion, useSingleFileAuthState} from "@adiwajshing/baileys";
 import {Boom} from "@hapi/boom";
-import {authFileDuplicate, authFileRestore} from "../util/authHandler";
+import {authFileDuplicate, authFileRestore, deleteAuthFile} from "../util/authHandler";
 import {sendQrCode} from "../util/qrCodeHandle";
+import {messageAnalisator} from "../util/messageHandle";
+import {WhatsSocket} from "./whatsSocket";
+import {VersionWaWeb} from "../static/versionWaWeb";
 
 
 const { state, saveState } = useSingleFileAuthState(authFileRestore())
+const sock = WhatsSocket.sock
 
-export async function connectToWhatsApp() {
-    const {version, isLatest} = await fetchLatestBaileysVersion()
-    console.log(`USANDO WHATS WEB  VERSAO ${version.join('.')}, isLatest: ${isLatest}`)
+export const connectToWhatsApp = async () => {
 
-    const sock = makeWASocket({
-        version,
-        auth: state,
-        printQRInTerminal: true
-    })
+    console.log(`USANDO WA v${VersionWaWeb.version.join('.')}`)
 
     /** connection state has been updated -- WS closed, opened, connecting etc. */
     sock.ev.on('connection.update', (update) => {
@@ -23,18 +21,33 @@ export async function connectToWhatsApp() {
             sendQrCode(qr)
         }
         console.log('ESTADO DA CONEXAO ', connection)
-        if (connection === 'close') {
-            const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
-            console.log('CONEXAO FECHADA POR ', lastDisconnect?.error, 'DATA-HORA ', lastDisconnect?.date, ', reconnecting ', shouldReconnect)
-            // reconnect if not logged out
-            if (shouldReconnect) {
-                console.log('RECONECTANDO...')
-                setTimeout(() => {
-                    connectToWhatsApp()
-                }, 60000)
-            }
-        } else if (connection === 'open') {
-            console.log('conexao aberta')
+        switch (connection) {
+            case 'open':
+                console.log('SISTEMA LOGADO AO WHATSAPP')
+                break
+            case 'close':
+                const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
+                console.log('CONEXAO FECHADA POR ', lastDisconnect?.error, 'DATA-HORA ', lastDisconnect?.date, ', reconnecting ', shouldReconnect)
+                // reconnect if not logged out
+                if (shouldReconnect) {
+                    console.log('RECONECTANDO...')
+                    setTimeout(() => {
+                        connectToWhatsApp()
+                    }, 5000)
+                } else{
+                    console.log('SISTEMA DESLOGADO DO WHATSAPP')
+                    console.log('!!! ATENCAO!!! AO LER QR CODE NAO PODE TER MENSAGENS PENDENTES')
+                    deleteAuthFile()
+                    console.log('ARQUIVO DE AUTENTICACAO DELETADO')
+                    console.log('SISTEMA SERA DESLIGADO EM 5 SEGUNDOS')
+                    setTimeout(() => {
+                        process.exit(1)
+                    }, 5000)
+                }
+                break
+            case undefined:
+                console.log('CONEXAO DESCONHECIDA DESCARTANDO...')
+                return
         }
     })
 
@@ -42,6 +55,12 @@ export async function connectToWhatsApp() {
         console.log('Mensagem recebida UPSERT ')
         console.log(JSON.stringify(m, undefined, 2))
         const message  = m.messages[0]
+        console.log(message)
+        if(message.key.remoteJid === 'status@broadcast'){
+            console.log('Mensagem de status@broadcast recebida e ignorada')
+            return
+        }
+        messageAnalisator(message)
         // if(!message.key.fromMe){
         //     console.log('respondendo para ', m.messages[0].key.remoteJid)
         //     sock.sendMessage(m.messages[0].key.remoteJid!, {text: 'Faaala José!'})
