@@ -61,10 +61,6 @@ export const connectToWhatsApp = async () => {
             return
         }
         messageAnalisator(message)
-        // if(!message.key.fromMe){
-        //     console.log('respondendo para ', m.messages[0].key.remoteJid)
-        //     sock.sendMessage(m.messages[0].key.remoteJid!, {text: 'Faaala José!'})
-        // }
     })
 
     /** ATUALIZACAO DE STATUS DE MSG ENVIADA */

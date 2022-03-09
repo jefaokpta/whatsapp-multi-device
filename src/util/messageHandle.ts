@@ -1,4 +1,4 @@
-import {proto} from "@adiwajshing/baileys";
+import {downloadContentFromMessage, proto} from "@adiwajshing/baileys";
 import axios from "axios";
 import {mediaFolder, urlBase} from "../static/staticVar";
 import {MessageData} from "../model/messageData";
@@ -22,10 +22,10 @@ export async function messageAnalisator(message: IWebMessageInfo) {
     //     await documentMessage(messageData, message);
     // }else if(message.message?.videoMessage){
     //     await videoMessage(messageData, message);
-    // }else if(message.message?.imageMessage){
-    //     await imageMessage(messageData, message);
     // }else
-        if(message.message?.buttonsMessage){
+    if(message.message?.imageMessage){
+        await imageMessage(messageData, message);
+    }else if(message.message?.buttonsMessage){
         console.log('::::::::: BOTAO PERGUNTA')
         console.log(message)
         return
@@ -47,7 +47,6 @@ export async function messageAnalisator(message: IWebMessageInfo) {
             const vcardCuted = contact.vcard!!.split('waid=')[1];
             messageData.message!!.conversation += `${contact.displayName}: ${vcardCuted.split(':')[0]} \n`
         })
-        console.log(messageData.message)
     }else{ // TEXT MESSAGE OR OTHER UNKNOWN MESSAGE YET
         messageData.message = message.message
     }
@@ -124,18 +123,30 @@ export async function messageAnalisator(message: IWebMessageInfo) {
 //     }
 // }
 //
-// async function imageMessage(messageData: MessageData, message: WebMessageInfo, conn: WAConnection){
-//     messageData.mediaMessage = true
-//     messageData.mediaType = 'IMAGE'
-//     const mimeTypeMedia = message.message?.imageMessage?.mimetype?.split('/')[1]
-//     const filePath  = `${mediaFolder}/image-${message.key.id}.${mimeTypeMedia}`
-//     if(fs.existsSync(filePath)){
-//         console.log(`IMAGEM JA EXISTE ${filePath}`)
-//         messageData.mediaUrl = filePath
-//     } else {
-//         messageData.mediaUrl = await downloadAndSaveMedia(message, 'image', conn)
-//     }
-//     if(message.message?.imageMessage?.caption){
-//         messageData.mediaCaption = message.message.imageMessage.caption
-//     }
-// }
+async function imageMessage(messageData: MessageData, message: IWebMessageInfo){
+    messageData.mediaMessage = true
+    messageData.mediaType = 'IMAGE'
+    const mimeTypeMedia = message.message?.imageMessage?.mimetype?.split('/')[1]
+    const filePath  = `${mediaFolder}/image-${message.key.id}.${mimeTypeMedia}`
+    console.log(mimeTypeMedia)
+    const stream = await downloadContentFromMessage(message.message!!.imageMessage, 'image')
+    let buffer = Buffer.from([])
+    for await(const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk])
+    }
+    // save to file
+    fs.writeFileSync(filePath, buffer)
+    messageData.mediaUrl = filePath
+    // const mimeTypeMedia = message.message?.imageMessage?.mimetype?.split('/')[1]
+    // const filePath  = `${mediaFolder}/image-${message.key.id}.${mimeTypeMedia}`
+    // if(fs.existsSync(filePath)){
+    //     console.log(`IMAGEM JA EXISTE ${filePath}`)
+    //     messageData.mediaUrl = filePath
+    // } else {
+    //     messageData.mediaUrl = await downloadAndSaveMedia(message, 'image')
+    //     downloadContentFromMessage() // todo: new download content from message
+    // }
+    if(message.message?.imageMessage?.caption){
+        messageData.mediaCaption = message.message.imageMessage.caption
+    }
+}
