@@ -1,13 +1,12 @@
-import makeWASocket, {useSingleFileAuthState} from "@adiwajshing/baileys";
-import {authFileRestore} from "../util/authHandler";
+import makeWASocket from "@adiwajshing/baileys";
 import {VersionWaWeb} from "../static/versionWaWeb";
+import {AuthState} from "./AuthState";
 
-const { state, saveState } = useSingleFileAuthState(authFileRestore())
 
 export class WhatsSocket {
-    static sock = makeWASocket({
+    sock = makeWASocket({
         version: VersionWaWeb.version,
-        auth: state,
+        auth: AuthState.state,
         printQRInTerminal: true
     })
 }

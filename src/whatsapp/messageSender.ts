@@ -4,15 +4,17 @@ import {mediaFolder} from "../static/staticVar";
 import {MediaMessage} from "../model/mediaMessage";
 import {WhatsSocket} from "./whatsSocket";
 import * as url from "url";
+import {AnyMediaMessageContent} from "@adiwajshing/baileys";
+import {WAMediaUpload} from "@adiwajshing/baileys/lib/Types/Message";
+import {ConnectionCenter} from "./ConnectionCenter";
 
 
-const sock = WhatsSocket.sock
 
-let frutas: string[]
-frutas= ["pera", "manzana", "uva"]
+const FILE_URL = `${mediaFolder}/outbox`
 
 export function sendTxt(message: MessageApi) {
-    sock.sendMessage(message.remoteJid, {text: message.message})
+    const sock = ConnectionCenter.socksMap.get('connectionUP')?.sock;
+    sock?.sendMessage(message.remoteJid, {text: message.message})
 }
 //
 // export function sendButtonsMessage(message: MessageApi) {
@@ -34,31 +36,46 @@ export function sendTxt(message: MessageApi) {
 // }
 //
 export function sendMediaMessage(fileUpload: MediaMessage) {
-    const messageDetail = messageDetails(fileUpload)
-    sock.sendMessage(fileUpload.remoteJid,
-        {
-            image: {url: `${mediaFolder}/outbox/${fileUpload.filePath}`},
-            caption: fileUpload.caption,
-            mimetype: messageDetail.mimeType,
-            ptt: fileUpload.ptt,
-            fileName: fileUpload.filePath
-        })
-        .then((returnedMessage) => console.log(returnedMessage.key))
-        .catch(error => console.log(error))
+    const sock = ConnectionCenter.socksMap.get('connectionUP')?.sock;
+    sock?.sendMessage(fileUpload.remoteJid, messageOptions(fileUpload))
+        //.then((returnedMessage) => console.log('CABOU DE ENVIAR: ', returnedMessage))
+        .catch(error => console.log('CAGOU', error))
 }
 
-function messageDetails(fileUpload: MediaMessage) {
+function messageOptions(fileUpload: MediaMessage): AnyMediaMessageContent {
     switch (fileUpload.fileType) {
         case 'IMAGE':
-            return  imageMimeType(fileUpload.filePath)
+            return  {
+                image: {url: `${FILE_URL}/${fileUpload.filePath}`},
+                caption: fileUpload.caption,
+                jpegThumbnail: undefined,
+            }
         case 'DOCUMENT':
-            return { messageType: 'document', mimeType:'application/pdf'}
+            return {
+                document: {url: `${FILE_URL}/${fileUpload.filePath}`},
+                mimetype: 'application/pdf',
+                fileName: fileUpload.filePath,
+            }
         case 'VIDEO':
-            return { messageType: 'video', mimeType: 'video/mp4'}
+            return {
+                video: {url: `${FILE_URL}/${fileUpload.filePath}`},
+                caption: fileUpload.caption,
+                gifPlayback: undefined,
+                jpegThumbnail: undefined,
+            }
         case 'AUDIO':
-            return audioMimeType(fileUpload)
+            return {
+                audio: {url: `${FILE_URL}/${fileUpload.filePath}`},
+                mimetype: audioMimeType(fileUpload).mimeType,
+                ptt: fileUpload.ptt,
+                seconds: undefined
+            }
         default:
-            return { messageType: 'num sei', mimeType: 'tb/numsei'}
+            return {
+                document: {url: `${FILE_URL}/${fileUpload.filePath}`},
+                mimetype: 'application/pdf',
+                fileName: fileUpload.filePath,
+            }
     }
 }
 

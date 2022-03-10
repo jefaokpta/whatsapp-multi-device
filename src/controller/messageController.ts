@@ -18,7 +18,7 @@ buttonMessageController.post('/', (req, res) => {
 })
 
 mediaMessageController.post('/', (req, res) => {
-    console.log('ENVIANDO IMAGEM ', req.body)
+    console.log('ENVIANDO MEDIA MESSAGE ', req.body)
     sendMediaMessage(req.body)
     res.sendStatus(200)
 })

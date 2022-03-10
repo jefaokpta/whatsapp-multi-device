@@ -3,16 +3,19 @@ import {Boom} from "@hapi/boom";
 import {authFileDuplicate, authFileRestore, deleteAuthFile} from "../util/authHandler";
 import {sendQrCode} from "../util/qrCodeHandle";
 import {messageAnalisator} from "../util/messageHandle";
-import {WhatsSocket} from "./whatsSocket";
 import {VersionWaWeb} from "../static/versionWaWeb";
+import axios from "axios";
+import {urlBase} from "../static/staticVar";
+import {WhatsSocket} from "./whatsSocket";
+import {AuthState} from "./AuthState";
+import {ConnectionCenter} from "./ConnectionCenter";
 
-
-const { state, saveState } = useSingleFileAuthState(authFileRestore())
-const sock = WhatsSocket.sock
 
 export const connectToWhatsApp = async () => {
 
     console.log(`USANDO WA v${VersionWaWeb.version.join('.')}`)
+    const sockClass = new WhatsSocket()
+    const sock = sockClass.sock
 
     /** connection state has been updated -- WS closed, opened, connecting etc. */
     sock.ev.on('connection.update', (update) => {
@@ -23,7 +26,8 @@ export const connectToWhatsApp = async () => {
         console.log('ESTADO DA CONEXAO ', connection)
         switch (connection) {
             case 'open':
-                console.log('SISTEMA LOGADO AO WHATSAPP')
+                ConnectionCenter.socksMap.set('connectionUP', sockClass)
+                console.log('SISTEMA LOGADO AO WHATSAPP 👍🏼 ')
                 break
             case 'close':
                 const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut
@@ -34,6 +38,7 @@ export const connectToWhatsApp = async () => {
                     setTimeout(() => {
                         connectToWhatsApp()
                     }, 5000)
+                    return
                 } else{
                     console.log('SISTEMA DESLOGADO DO WHATSAPP')
                     console.log('!!! ATENCAO!!! AO LER QR CODE NAO PODE TER MENSAGENS PENDENTES')
@@ -65,14 +70,17 @@ export const connectToWhatsApp = async () => {
 
     /** ATUALIZACAO DE STATUS DE MSG ENVIADA */
     sock.ev.on('messages.update', m => {
-        console.log('RECEBENDO messages.update')
-        console.log(m)
+        return axios.post(`${urlBase}/api/messages/status/update`, {
+            remoteJid: m[0].key.remoteJid,
+            id: m[0].key.id,
+            status: m[0].update.status
+        })
     })
 
     /** ATUALIZA ARQUIVO AUTHS */
     sock.ev.on('creds.update',  () => {
         console.log('ATUALIZANDO CREDS')
-        saveState()
+        AuthState.saveState()
         authFileDuplicate()
     })
 

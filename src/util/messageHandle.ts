@@ -16,14 +16,13 @@ export async function messageAnalisator(message: IWebMessageInfo) {
         false
     )
 
-    // if(message.message?.audioMessage){
-    //     await audioMessage(messageData, message);
+    if(message.message?.audioMessage){
+        await audioMessage(messageData, message);
     // }else if(message.message?.documentMessage){
     //     await documentMessage(messageData, message);
     // }else if(message.message?.videoMessage){
     //     await videoMessage(messageData, message);
-    // }else
-    if(message.message?.imageMessage){
+    }else if(message.message?.imageMessage){
         await imageMessage(messageData, message);
     }else if(message.message?.buttonsMessage){
         console.log('::::::::: BOTAO PERGUNTA')
@@ -59,29 +58,30 @@ export async function messageAnalisator(message: IWebMessageInfo) {
 //     return conn.downloadAndSaveMediaMessage (message, `${mediaFolder}/${fileName}`) // to decrypt & save to file
 // }
 //
-// async function audioMessage(messageData: MessageData, message: IWebMessageInfo){
-//     messageData.mediaMessage = true
-//     messageData.mediaType = 'AUDIO'
-//     console.log(message.message?.audioMessage?.mimetype)
-//     const mimeTypeMedia = defineMimeTypeAudioMedia(message);
-//     const filePath  = `${mediaFolder}/audio-${message.key.id}.${mimeTypeMedia}`
-//     if(fs.existsSync(filePath)){
-//         console.log(`AUDIO JA EXISTE ${filePath}`)
-//         messageData.mediaUrl = filePath
-//     } else {
-//         messageData.mediaUrl = await downloadAndSaveMedia(message, 'audio', conn)
-//     }
-// }
-//
-// function defineMimeTypeAudioMedia(message: WebMessageInfo){
-//     if(message.message?.audioMessage?.mimetype?.includes('ogg')){
-//         return 'ogg'
-//     } else if(message.message?.audioMessage?.mimetype?.includes('mp4')){
-//         return 'mp4'
-//     } else{
-//         return 'mpeg'
-//     }
-// }
+async function audioMessage(messageData: MessageData, message: IWebMessageInfo){
+    messageData.mediaMessage = true
+    messageData.mediaType = 'AUDIO'
+    const mimeTypeMedia = defineMimeTypeAudioMedia(message);
+    const filePath  = `${mediaFolder}/audio-${message.key.id}.${mimeTypeMedia}`
+    messageData.mediaUrl = filePath
+    const stream = await downloadContentFromMessage(message.message!!.audioMessage, 'audio')
+    let buffer = Buffer.from([])
+    for await(const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk])
+    }
+    // save to file
+    fs.writeFileSync(filePath, buffer)
+}
+
+function defineMimeTypeAudioMedia(message: IWebMessageInfo){
+    if(message.message?.audioMessage?.mimetype?.includes('ogg')){
+        return 'ogg'
+    } else if(message.message?.audioMessage?.mimetype?.includes('mp4')){
+        return 'mp4'
+    } else{
+        return 'mpeg'
+    }
+}
 //
 // async function documentMessage(messageData: MessageData, conn: WAConnection, message: WebMessageInfo) {
 //     messageData.mediaMessage = true
@@ -128,7 +128,6 @@ async function imageMessage(messageData: MessageData, message: IWebMessageInfo){
     messageData.mediaType = 'IMAGE'
     const mimeTypeMedia = message.message?.imageMessage?.mimetype?.split('/')[1]
     const filePath  = `${mediaFolder}/image-${message.key.id}.${mimeTypeMedia}`
-    console.log(mimeTypeMedia)
     const stream = await downloadContentFromMessage(message.message!!.imageMessage, 'image')
     let buffer = Buffer.from([])
     for await(const chunk of stream) {
