@@ -1,5 +1,5 @@
 import express from "express";
-import {sendMediaMessage, sendTxt} from "../whatsapp/messageSender";
+import {sendButtonsMessage, sendMediaMessage, sendTxt} from "../whatsapp/messageSender";
 
 
 export const messageController = express()
@@ -13,7 +13,7 @@ messageController.post('/', (req, res) => {
 })
 
 buttonMessageController.post('/', (req, res) => {
-    //sendButtonsMessage(req.body)
+    sendButtonsMessage(req.body)
     res.sendStatus(200)
 })
 

@@ -5,6 +5,7 @@ import {MessageData} from "../model/messageData";
 import * as fs from "fs";
 import IWebMessageInfo = proto.IWebMessageInfo;
 
+// todo: ONDE COLOCAR O COMANDO DE MENSAGEM LIDA?
 export async function messageAnalisator(message: IWebMessageInfo) {
     const messageData = new MessageData(
         message.key,
@@ -24,11 +25,11 @@ export async function messageAnalisator(message: IWebMessageInfo) {
         await videoMessage(messageData, message);
     }else if(message.message?.imageMessage){
         await imageMessage(messageData, message);
-    }else if(message.message?.buttonsMessage){ // todo: buttonsMessage pergunta
+    }else if(message.message?.buttonsMessage){
         console.log('::::::::: BOTAO PERGUNTA')
         console.log(message)
         return
-    }else if(message.message?.buttonsResponseMessage){ // todo: buttonsResponseMessage resposta
+    }else if(message.message?.buttonsResponseMessage){
         console.log(';;;;;;;;;;;; BOTAO RESPOSTA')
         console.log(message)
         messageData.message = message.message

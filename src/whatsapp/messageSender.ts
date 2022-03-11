@@ -1,11 +1,7 @@
 import {MessageApi} from "../model/messageApi";
-import {messageAnalisator} from "../util/messageHandle";
 import {mediaFolder} from "../static/staticVar";
 import {MediaMessage} from "../model/mediaMessage";
-import {WhatsSocket} from "./whatsSocket";
-import * as url from "url";
 import {AnyMediaMessageContent} from "@adiwajshing/baileys";
-import {WAMediaUpload} from "@adiwajshing/baileys/lib/Types/Message";
 import {ConnectionCenter} from "./ConnectionCenter";
 
 
@@ -15,25 +11,32 @@ export function sendTxt(message: MessageApi) {
     const sock = ConnectionCenter.getSocket()?.sock
     sock.sendMessage(message.remoteJid, {text: message.message})
 }
-//
-// export function sendButtonsMessage(message: MessageApi) {
-//     // send a buttons message!
-//     const buttons = [
-//         {buttonId: '3', buttonText: {displayText: '😃'}, type: 1},
-//         {buttonId: '2', buttonText: {displayText: '😐'}, type: 1},
-//         {buttonId: '1', buttonText: {displayText: '😩'}, type: 1}
-//     ]
-//     const buttonMessage = new ButtonsMessage({
-//         contentText: message.btnText,
-//         footerText: message.btnFooterText,
-//         buttons: buttons,
-//         headerType: 1
-//     })
-//     conn.sendMessage (message.remoteJid, buttonMessage, MessageType.buttonsMessage)
-//         .then((messageBuilded) => console.log(messageBuilded.key))
-//         .catch(error => console.log(error))
-// }
-//
+
+export function sendButtonsMessage(message: MessageApi) {
+    const sock = ConnectionCenter.getSocket()?.sock
+    // send a buttons message!
+    const buttons = [
+        {buttonId: '3', buttonText: {displayText: '😃'}, type: 1},
+        {buttonId: '2', buttonText: {displayText: '😐'}, type: 1},
+        {buttonId: '1', buttonText: {displayText: '😩'}, type: 1}
+    ]
+    /**const buttonMediaMessage = { // this is a BUTTON media message
+        image: {url: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg'},
+        caption: message.btnText,
+        footer: 'msg de foooter',
+        buttons: buttons,
+        headerType: 4
+    }*/
+    const buttonMessage = {
+        text: message.btnText!!,
+        footer: message.btnFooterText,
+        buttons: buttons,
+        headerType: 1
+    }
+    sock.sendMessage (message.remoteJid, buttonMessage)
+        .catch(error => console.log('ERRO AO ENVIAR BOTOES ',error))
+}
+
 export function sendMediaMessage(fileUpload: MediaMessage) {
     const sock = ConnectionCenter.getSocket().sock
     sock.sendMessage(fileUpload.remoteJid, messageOptions(fileUpload))
