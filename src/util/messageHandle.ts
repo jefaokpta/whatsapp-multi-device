@@ -18,17 +18,17 @@ export async function messageAnalisator(message: IWebMessageInfo) {
 
     if(message.message?.audioMessage){
         await audioMessage(messageData, message);
-    // }else if(message.message?.documentMessage){
-    //     await documentMessage(messageData, message);
-    // }else if(message.message?.videoMessage){
-    //     await videoMessage(messageData, message);
+    }else if(message.message?.documentMessage){
+        await documentMessage(messageData, message);
+    }else if(message.message?.videoMessage){
+        await videoMessage(messageData, message);
     }else if(message.message?.imageMessage){
         await imageMessage(messageData, message);
-    }else if(message.message?.buttonsMessage){
+    }else if(message.message?.buttonsMessage){ // todo: buttonsMessage pergunta
         console.log('::::::::: BOTAO PERGUNTA')
         console.log(message)
         return
-    }else if(message.message?.buttonsResponseMessage){
+    }else if(message.message?.buttonsResponseMessage){ // todo: buttonsResponseMessage resposta
         console.log(';;;;;;;;;;;; BOTAO RESPOSTA')
         console.log(message)
         messageData.message = message.message
@@ -52,12 +52,6 @@ export async function messageAnalisator(message: IWebMessageInfo) {
     return axios.post(`${urlBase}/api/messages`, messageData)
 }
 
-// function downloadAndSaveMedia(message: IWebMessageInfo, mediaTitle: string){
-//     console.log(`Downloading media: ${mediaTitle}`)
-//     const fileName = `${mediaTitle}-${message.key.id}`
-//     return conn.downloadAndSaveMediaMessage (message, `${mediaFolder}/${fileName}`) // to decrypt & save to file
-// }
-//
 async function audioMessage(messageData: MessageData, message: IWebMessageInfo){
     messageData.mediaMessage = true
     messageData.mediaType = 'AUDIO'
@@ -82,47 +76,43 @@ function defineMimeTypeAudioMedia(message: IWebMessageInfo){
         return 'mpeg'
     }
 }
-//
-// async function documentMessage(messageData: MessageData, conn: WAConnection, message: WebMessageInfo) {
-//     messageData.mediaMessage = true
-//     messageData.mediaType = 'DOCUMENT'
-//     const fileTitle = message.message!!.documentMessage!!.fileName
-//     const fileExtension = fileTitle!!.substring(fileTitle!!.lastIndexOf('.'))
-//     const filePath = `${mediaFolder}/document-${message.key.id}${fileExtension}`
-//     if(fs.existsSync(filePath)){
-//         console.log(`DOCUMENTO JA EXISTE ${filePath}`)
-//     } else {
-//         const buffer = await conn.downloadMediaMessage(message)
-//         console.log(`Downloading media: ${fileTitle}`)
-//         try{
-//             fs.writeFileSync(filePath, buffer)
-//         }catch (e) {
-//             console.log('ERRO AO SALVAR DOCUMENTO')
-//             console.log(e)
-//         }
-//         console.log(`Documento salvo em: ${filePath}`)
-//     }
-//     messageData.mediaUrl = filePath
-//     messageData.mediaFileLength = message.message?.documentMessage?.fileLength
-//     messageData.mediaPageCount = message.message?.documentMessage?.pageCount
-//     messageData.mediaFileTitle = fileTitle
-// }
-//
-// async function videoMessage(messageData: MessageData, message: WebMessageInfo, conn: WAConnection){
-//     messageData.mediaMessage = true
-//     messageData.mediaType = 'VIDEO'
-//     const filePath  = `${mediaFolder}/video-${message.key.id}.mp4`
-//     if(fs.existsSync(filePath)){
-//         console.log(`VIDEO JA EXISTE ${filePath}`)
-//         messageData.mediaUrl = filePath
-//     } else {
-//     messageData.mediaUrl = await downloadAndSaveMedia(message, 'video', conn)
-//     }
-//     if (message.message?.videoMessage?.caption) {
-//         messageData.mediaCaption = message.message.videoMessage.caption
-//     }
-// }
-//
+
+async function documentMessage(messageData: MessageData, message: IWebMessageInfo) {
+    messageData.mediaMessage = true
+    messageData.mediaType = 'DOCUMENT'
+    const fileTitle = message.message!!.documentMessage!!.fileName
+    const fileExtension = fileTitle!!.substring(fileTitle!!.lastIndexOf('.'))
+    const filePath = `${mediaFolder}/document-${message.key.id}${fileExtension}`
+    const stream = await downloadContentFromMessage(message.message!!.documentMessage, 'document')
+    let buffer = Buffer.from([])
+    for await(const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk])
+    }
+    // save to file
+    fs.writeFileSync(filePath, buffer)
+    messageData.mediaUrl = filePath
+    messageData.mediaFileLength = message.message?.documentMessage?.fileLength
+    messageData.mediaPageCount = message.message?.documentMessage?.pageCount
+    messageData.mediaFileTitle = fileTitle
+}
+
+async function videoMessage(messageData: MessageData, message: IWebMessageInfo){
+    messageData.mediaMessage = true
+    messageData.mediaType = 'VIDEO'
+    const filePath  = `${mediaFolder}/video-${message.key.id}.mp4`
+    messageData.mediaUrl = filePath
+    const stream = await downloadContentFromMessage(message.message!!.videoMessage, 'video')
+    let buffer = Buffer.from([])
+    for await(const chunk of stream) {
+        buffer = Buffer.concat([buffer, chunk])
+    }
+    // save to file
+    fs.writeFileSync(filePath, buffer)
+    if (message.message?.videoMessage?.caption) {
+        messageData.mediaCaption = message.message.videoMessage.caption
+    }
+}
+
 async function imageMessage(messageData: MessageData, message: IWebMessageInfo){
     messageData.mediaMessage = true
     messageData.mediaType = 'IMAGE'
@@ -136,15 +126,6 @@ async function imageMessage(messageData: MessageData, message: IWebMessageInfo){
     // save to file
     fs.writeFileSync(filePath, buffer)
     messageData.mediaUrl = filePath
-    // const mimeTypeMedia = message.message?.imageMessage?.mimetype?.split('/')[1]
-    // const filePath  = `${mediaFolder}/image-${message.key.id}.${mimeTypeMedia}`
-    // if(fs.existsSync(filePath)){
-    //     console.log(`IMAGEM JA EXISTE ${filePath}`)
-    //     messageData.mediaUrl = filePath
-    // } else {
-    //     messageData.mediaUrl = await downloadAndSaveMedia(message, 'image')
-    //     downloadContentFromMessage() // todo: new download content from message
-    // }
     if(message.message?.imageMessage?.caption){
         messageData.mediaCaption = message.message.imageMessage.caption
     }

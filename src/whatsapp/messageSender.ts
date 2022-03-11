@@ -9,12 +9,11 @@ import {WAMediaUpload} from "@adiwajshing/baileys/lib/Types/Message";
 import {ConnectionCenter} from "./ConnectionCenter";
 
 
-
 const FILE_URL = `${mediaFolder}/outbox`
 
 export function sendTxt(message: MessageApi) {
-    const sock = ConnectionCenter.socksMap.get('connectionUP')?.sock;
-    sock?.sendMessage(message.remoteJid, {text: message.message})
+    const sock = ConnectionCenter.getSocket()?.sock
+    sock.sendMessage(message.remoteJid, {text: message.message})
 }
 //
 // export function sendButtonsMessage(message: MessageApi) {
@@ -36,8 +35,8 @@ export function sendTxt(message: MessageApi) {
 // }
 //
 export function sendMediaMessage(fileUpload: MediaMessage) {
-    const sock = ConnectionCenter.socksMap.get('connectionUP')?.sock;
-    sock?.sendMessage(fileUpload.remoteJid, messageOptions(fileUpload))
+    const sock = ConnectionCenter.getSocket().sock
+    sock.sendMessage(fileUpload.remoteJid, messageOptions(fileUpload))
         //.then((returnedMessage) => console.log('CABOU DE ENVIAR: ', returnedMessage))
         .catch(error => console.log('CAGOU', error))
 }

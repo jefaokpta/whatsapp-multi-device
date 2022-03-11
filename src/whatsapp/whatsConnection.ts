@@ -26,7 +26,7 @@ export const connectToWhatsApp = async () => {
         console.log('ESTADO DA CONEXAO ', connection)
         switch (connection) {
             case 'open':
-                ConnectionCenter.socksMap.set('connectionUP', sockClass)
+                ConnectionCenter.setSocket(sockClass)
                 console.log('SISTEMA LOGADO AO WHATSAPP 👍🏼 ')
                 break
             case 'close':
