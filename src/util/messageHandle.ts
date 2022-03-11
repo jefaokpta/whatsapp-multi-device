@@ -5,7 +5,7 @@ import {MessageData} from "../model/messageData";
 import * as fs from "fs";
 import IWebMessageInfo = proto.IWebMessageInfo;
 
-// todo: ONDE COLOCAR O COMANDO DE MENSAGEM LIDA?
+// todo: TESTAR NO DOCKER
 export async function messageAnalisator(message: IWebMessageInfo) {
     const messageData = new MessageData(
         message.key,

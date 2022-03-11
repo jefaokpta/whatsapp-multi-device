@@ -62,10 +62,21 @@ export const connectToWhatsApp = async () => {
         const message  = m.messages[0]
         console.log(message)
         if(message.key.remoteJid === 'status@broadcast'){
-            console.log('Mensagem de status@broadcast recebida e ignorada')
+            console.log('MENSAGEM status@broadcast RECEBIDA E DESCARTADA')
             return
         }
         messageAnalisator(message)
+            .then(() => {
+                if(!message.key.fromMe){
+                    setTimeout(() => {
+                        console.log('MENSAGEM MARCADA COMO LIDA')
+                        sock.sendReadReceipt(message.key.remoteJid!, message.key.participant!, [message.key.id!])
+                            .then(() => {
+                                console.log('MENSAGEM LIDA')
+                            }).catch(err => console.log('ERRO AO MARCAR MENSAGEM COMO LIDA', err))
+                    }, 5000)
+                }
+            })
     })
 
     /** ATUALIZACAO DE STATUS DE MSG ENVIADA */
