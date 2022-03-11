@@ -50,6 +50,7 @@ function messageOptions(fileUpload: MediaMessage): AnyMediaMessageContent {
             return  {
                 image: {url: `${FILE_URL}/${fileUpload.filePath}`},
                 caption: fileUpload.caption,
+                mimetype: imageMimeType(fileUpload.filePath).mimeType,
                 jpegThumbnail: undefined,
             }
         case 'DOCUMENT':
