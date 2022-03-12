@@ -5,7 +5,6 @@ import {MessageData} from "../model/messageData";
 import * as fs from "fs";
 import IWebMessageInfo = proto.IWebMessageInfo;
 
-// todo: TESTAR NO DOCKER
 export async function messageAnalisator(message: IWebMessageInfo) {
     const messageData = new MessageData(
         message.key,
@@ -59,6 +58,7 @@ async function audioMessage(messageData: MessageData, message: IWebMessageInfo){
     const mimeTypeMedia = defineMimeTypeAudioMedia(message);
     const filePath  = `${mediaFolder}/audio-${message.key.id}.${mimeTypeMedia}`
     messageData.mediaUrl = filePath
+    // @ts-ignore
     const stream = await downloadContentFromMessage(message.message!!.audioMessage, 'audio')
     let buffer = Buffer.from([])
     for await(const chunk of stream) {
@@ -84,6 +84,7 @@ async function documentMessage(messageData: MessageData, message: IWebMessageInf
     const fileTitle = message.message!!.documentMessage!!.fileName
     const fileExtension = fileTitle!!.substring(fileTitle!!.lastIndexOf('.'))
     const filePath = `${mediaFolder}/document-${message.key.id}${fileExtension}`
+    // @ts-ignore
     const stream = await downloadContentFromMessage(message.message!!.documentMessage, 'document')
     let buffer = Buffer.from([])
     for await(const chunk of stream) {
@@ -102,6 +103,7 @@ async function videoMessage(messageData: MessageData, message: IWebMessageInfo){
     messageData.mediaType = 'VIDEO'
     const filePath  = `${mediaFolder}/video-${message.key.id}.mp4`
     messageData.mediaUrl = filePath
+    // @ts-ignore
     const stream = await downloadContentFromMessage(message.message!!.videoMessage, 'video')
     let buffer = Buffer.from([])
     for await(const chunk of stream) {
@@ -119,6 +121,7 @@ async function imageMessage(messageData: MessageData, message: IWebMessageInfo){
     messageData.mediaType = 'IMAGE'
     const mimeTypeMedia = message.message?.imageMessage?.mimetype?.split('/')[1]
     const filePath  = `${mediaFolder}/image-${message.key.id}.${mimeTypeMedia}`
+    // @ts-ignore
     const stream = await downloadContentFromMessage(message.message!!.imageMessage, 'image')
     let buffer = Buffer.from([])
     for await(const chunk of stream) {

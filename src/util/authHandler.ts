@@ -3,7 +3,7 @@ import {mediaFolder} from "../static/staticVar";
 
 const companyId = process.env.COMPANY || '12'
 const authFilePath = `./auth_info_multi-${companyId}.json`
-const authFilePathBkp = `./${mediaFolder}/auths/auth_info_multi-${companyId}.json`
+const authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}.json`
 
 export function authFileRestore() {
     if (!fs.existsSync(authFilePath)) {
