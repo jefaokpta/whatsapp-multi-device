@@ -1,6 +1,6 @@
-import makeWASocket, {DisconnectReason, fetchLatestBaileysVersion, useSingleFileAuthState} from "@adiwajshing/baileys";
+import {DisconnectReason} from "@adiwajshing/baileys";
 import {Boom} from "@hapi/boom";
-import {authFileDuplicate, authFileRestore, deleteAuthFile} from "../util/authHandler";
+import {authFileDuplicate, confirmAuthToApi, deleteAuthFile} from "../util/authHandler";
 import {sendQrCode} from "../util/qrCodeHandle";
 import {messageAnalisator} from "../util/messageHandle";
 import {VersionWaWeb} from "../static/versionWaWeb";
@@ -28,6 +28,7 @@ export const connectToWhatsApp = async () => {
             case 'open':
                 ConnectionCenter.setSocket(sockClass)
                 console.log('SISTEMA LOGADO AO WHATSAPP 👍🏼 ')
+                confirmAuthToApi()
                 break
             case 'close':
                 const shouldReconnect = (lastDisconnect?.error as Boom)?.output?.statusCode !== DisconnectReason.loggedOut

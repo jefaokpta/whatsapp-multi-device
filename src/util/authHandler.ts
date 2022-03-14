@@ -1,5 +1,6 @@
 import fs from "fs";
-import {mediaFolder} from "../static/staticVar";
+import {mediaFolder, urlBase} from "../static/staticVar";
+import axios from "axios";
 
 const companyId = process.env.COMPANY || '12'
 const authFilePath = `./auth_info_multi-${companyId}.json`
@@ -33,4 +34,14 @@ export function deleteAuthFile() {
         if (err) console.log('ERRO AO DELETAR AUTH FILE', err)
         else console.log('AUTH FILE BACKUP DELETADO.');
     });
+}
+
+export function confirmAuthToApi(){
+    axios.post(`${urlBase}/api/register/auth/${companyId}`)
+        .then(() => {
+            console.log('AUTH CONFIRMADA')
+        })
+        .catch(err => {
+            console.log('ERRO AO CONFIRMAR AUTH', err)
+        })
 }
