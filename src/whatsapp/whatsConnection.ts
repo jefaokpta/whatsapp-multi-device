@@ -70,10 +70,9 @@ export const connectToWhatsApp = async () => {
             .then(() => {
                 if(!message.key.fromMe){
                     setTimeout(() => {
-                        console.log('MENSAGEM MARCADA COMO LIDA')
                         sock.sendReadReceipt(message.key.remoteJid!, message.key.participant!, [message.key.id!])
                             .then(() => {
-                                console.log('MENSAGEM LIDA')
+                                console.log('MENSAGEM MARCADA COMO LIDA')
                             }).catch(err => console.log('ERRO AO MARCAR MENSAGEM COMO LIDA', err))
                     }, 5000)
                 }

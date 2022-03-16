@@ -3,7 +3,11 @@ import {mediaFolder, urlBase} from "../static/staticVar";
 import axios from "axios";
 
 const companyId = process.env.COMPANY || '12'
-const authFilePath = `./auth_info_multi-${companyId}.json`
+let authFilePath = `./auth_info_multi-${companyId}.json`
+if(urlBase.split(':').pop() === '9090'){
+    authFilePath = `./auth_info_multi-${companyId}-homolog.json`
+}
+console.log(urlBase.split(':').pop())
 const authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}.json`
 
 export function authFileRestore() {
