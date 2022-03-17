@@ -8,12 +8,12 @@ import {ConnectionCenter} from "./ConnectionCenter";
 const FILE_URL = `${mediaFolder}/outbox`
 
 export function sendTxt(message: MessageApi) {
-    const sock = ConnectionCenter.getSocket()?.sock
+    const sock = ConnectionCenter.getSocket().sock
     sock.sendMessage(message.remoteJid, {text: message.message})
 }
 
 export function sendButtonsMessage(message: MessageApi) {
-    const sock = ConnectionCenter.getSocket()?.sock
+    const sock = ConnectionCenter.getSocket().sock
     // send a buttons message!
     const buttons = [
         {buttonId: '3', buttonText: {displayText: '😃'}, type: 1},
