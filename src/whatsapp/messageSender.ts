@@ -69,7 +69,7 @@ function messageOptions(fileUpload: MediaMessage): AnyMediaMessageContent {
         case 'AUDIO':
             return {
                 audio: {url: `${FILE_URL}/${fileUpload.filePath}`},
-                mimetype: audioMimeType(fileUpload).mimeType,
+                mimetype: 'audio/mp4',
                 ptt: fileUpload.ptt,
                 seconds: undefined
             }
@@ -79,19 +79,6 @@ function messageOptions(fileUpload: MediaMessage): AnyMediaMessageContent {
                 mimetype: 'application/pdf',
                 fileName: fileUpload.filePath,
             }
-    }
-}
-
-function audioMimeType(fileUpload: MediaMessage) {
-    if(fileUpload.ptt){
-        return {
-            messageType: 'audio',
-            mimeType: 'audio/ogg'
-        }
-    }
-    return {
-        messageType: 'audio',
-        mimeType: 'audio/mp4'
     }
 }
 
