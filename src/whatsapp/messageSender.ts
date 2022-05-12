@@ -1,9 +1,11 @@
 import {MessageApi} from "../model/messageApi";
 import {mediaFolder} from "../static/staticVar";
 import {MediaMessage} from "../model/mediaMessage";
-import {AnyMediaMessageContent} from "@adiwajshing/baileys";
 import {ConnectionCenter} from "./ConnectionCenter";
+import util from "util";
 
+
+const exec =  util.promisify(require("child_process").exec);
 
 const FILE_URL = `${mediaFolder}/outbox`
 
@@ -37,17 +39,17 @@ export function sendButtonsMessage(message: MessageApi) {
         .catch(error => console.log('ERRO AO ENVIAR BOTOES ',error))
 }
 
-export function sendMediaMessage(fileUpload: MediaMessage) {
+export async function sendMediaMessage(fileUpload: MediaMessage) {
     const sock = ConnectionCenter.getSocket().sock
-    sock.sendMessage(fileUpload.remoteJid, messageOptions(fileUpload))
+    sock.sendMessage(fileUpload.remoteJid, await messageOptions(fileUpload))
         //.then((returnedMessage) => console.log('CABOU DE ENVIAR: ', returnedMessage))
         .catch(error => console.log('CAGOU', error))
 }
 
-function messageOptions(fileUpload: MediaMessage): AnyMediaMessageContent {
+async function messageOptions(fileUpload: MediaMessage) {
     switch (fileUpload.fileType) {
         case 'IMAGE':
-            return  {
+            return {
                 image: {url: `${FILE_URL}/${fileUpload.filePath}`},
                 caption: fileUpload.caption,
                 mimetype: imageMimeType(fileUpload.filePath).mimeType,
@@ -67,8 +69,12 @@ function messageOptions(fileUpload: MediaMessage): AnyMediaMessageContent {
                 jpegThumbnail: undefined,
             }
         case 'AUDIO':
+            let audioFile = `${FILE_URL}/${fileUpload.filePath}`
+            if (fileUpload.ptt) {
+                audioFile = await convertAudioToM4a(fileUpload.filePath)
+            }
             return {
-                audio: {url: `${FILE_URL}/${fileUpload.filePath}`},
+                audio: {url: audioFile},
                 mimetype: 'audio/mp4',
                 ptt: fileUpload.ptt,
                 seconds: undefined
@@ -79,6 +85,25 @@ function messageOptions(fileUpload: MediaMessage): AnyMediaMessageContent {
                 mimetype: 'application/pdf',
                 fileName: fileUpload.filePath,
             }
+    }
+}
+
+async function convertAudioToM4a(filePath: string) {
+    const file = `${FILE_URL}/${filePath}`
+    const fileName = filePath.split('.')[0]
+    const m4aFile = `${FILE_URL}/${fileName}.m4a`
+    const command = `ffmpeg -i ${file} -vn -ar 44100 -ac 1 ${m4aFile} -y`
+    try {
+        const {error, stdout, stderr} = await exec(command)
+        if (error) {
+            console.log('ERRO AO CONVERTER AUDIO: ', error)
+            return file
+        }
+        console.log('AUDIO M4A CONVERTIDO COM SUCESSO: ', m4aFile)
+        return m4aFile
+    } catch (errorTry) {
+        console.log('ERRO AO CONVERTER AUDIO: ', errorTry)
+        return file
     }
 }
 
