@@ -58,10 +58,14 @@ export const connectToWhatsApp = async () => {
     })
 
     sock.ev.on('messages.upsert',  m => {
-        console.log('Mensagem recebida UPSERT ')
-        console.log(JSON.stringify(m, undefined, 2))
+        // console.log('Mensagem recebida UPSERT ')
+        // console.log(JSON.stringify(m, undefined, 2))
         const message  = m.messages[0]
         console.log(message)
+        if(message.key.remoteJid?.includes('@g.us')){
+            console.log('MENSAGEM DE GRUPO, IGNORANDO E DESCARTANDO...')
+            return
+        }
         if(message.key.remoteJid === 'status@broadcast'){
             console.log('MENSAGEM status@broadcast RECEBIDA E DESCARTADA')
             return
@@ -72,7 +76,7 @@ export const connectToWhatsApp = async () => {
                     setTimeout(() => {
                         sock.sendReadReceipt(message.key.remoteJid!, message.key.participant!, [message.key.id!])
                             .then(() => {
-                                console.log('MENSAGEM MARCADA COMO LIDA')
+                                // console.log('MENSAGEM MARCADA COMO LIDA')
                             }).catch(err => console.log('ERRO AO MARCAR MENSAGEM COMO LIDA', err))
                     }, 5000)
                 }
