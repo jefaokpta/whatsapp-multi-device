@@ -4,7 +4,7 @@ import {buttonMessageController, mediaMessageController, messageController} from
 import {fetchLatestBaileysVersion} from "@adiwajshing/baileys";
 import {VersionWaWeb} from "./static/versionWaWeb";
 import {profilePicture} from "./controller/profilePictureController";
-const port = process.env.PORT || 3001
+const port = process.env.PORT || 3007
 
 const router = express()
 router.use(express.json())

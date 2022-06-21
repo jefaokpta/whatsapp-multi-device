@@ -2,7 +2,7 @@ import fs from "fs";
 import {mediaFolder, urlBase} from "../static/staticVar";
 import axios from "axios";
 
-const companyId = process.env.COMPANY || '12'
+const companyId = process.env.COMPANY || '18'
 let authFilePath = `./auth_info_multi-${companyId}.json`
 if(urlBase.split(':').pop() === '9090'){
     authFilePath = `./auth_info_multi-${companyId}-homolog.json`

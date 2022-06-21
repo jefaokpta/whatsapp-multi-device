@@ -11,8 +11,8 @@ export async function messageAnalisator(message: IWebMessageInfo) {
         null,
         message.messageTimestamp,
         message.status || 0,
-        process.env.COMPANY || "12",
-        process.env.API_PORT || "3001",
+        process.env.COMPANY || "18",
+        process.env.API_PORT || "3007",
         false
     )
 
