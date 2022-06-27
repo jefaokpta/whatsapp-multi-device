@@ -4,10 +4,11 @@ import axios from "axios";
 
 const companyId = process.env.COMPANY || '18'
 let authFilePath = `./auth_info_multi-${companyId}.json`
+let authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}.json`
 if(urlBase.split(':').pop() === '9090'){
     authFilePath = `./auth_info_multi-${companyId}-homolog.json`
+    authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}-homolog.json`
 }
-const authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}.json`
 
 export function authFileRestore() {
     if (!fs.existsSync(authFilePath)) {
