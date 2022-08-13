@@ -70,11 +70,19 @@ export const connectToWhatsApp = async () => {
             console.log('MENSAGEM status@broadcast RECEBIDA E DESCARTADA')
             return
         }
+        if(message.message?.viewOnceMessage?.message?.buttonsMessage){
+            console.log('MENSAGEM DE BOTOES RECEBIDA E DESCARTADA')
+            return
+        }
         messageAnalisator(message)
             .then(() => {
                 if(!message.key.fromMe){
                     setTimeout(() => {
-                        sock.sendReadReceipt(message.key.remoteJid!, message.key.participant!, [message.key.id!])
+                        // sock.sendReadReceipt(message.key.remoteJid!, message.key.participant!, [message.key.id!])
+                        sock.readMessages([{
+                            remoteJid: message.key.remoteJid!,
+                            id: message.key.id!,
+                            participant: message.key.participant!}])
                             .then(() => {
                                 // console.log('MENSAGEM MARCADA COMO LIDA')
                             }).catch(err => console.log('ERRO AO MARCAR MENSAGEM COMO LIDA', err))
