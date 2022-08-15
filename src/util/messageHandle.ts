@@ -4,6 +4,7 @@ import {mediaFolder, urlBase} from "../static/staticVar";
 import {MessageData} from "../model/messageData";
 import * as fs from "fs";
 import IWebMessageInfo = proto.IWebMessageInfo;
+import {WaitSurveyResponse} from "../static/WaitSurveyResponse";
 
 export async function messageAnalisator(message: IWebMessageInfo) {
     const messageData = new MessageData(
@@ -15,6 +16,14 @@ export async function messageAnalisator(message: IWebMessageInfo) {
         process.env.API_PORT || "3007",
         false
     )
+
+    if(WaitSurveyResponse.hasWaitSurvey(message.key.remoteJid!)){ // PASSANDO DE 4 MINUTOS APAGA O SURVEY
+        const diffMinutes = getDiffMinutes(WaitSurveyResponse.getWaitSurvey(message.key.remoteJid!) || new Date())
+        console.log(';;;;;;;;;;;;; SURVEY DIFF MINUTES  ' + diffMinutes)
+        if(diffMinutes > 4){
+            WaitSurveyResponse.getAndDeleteWaitSurvey(message.key.remoteJid!)
+        }
+    }
 
     if(message.message?.audioMessage){
         await audioMessage(messageData, message);
@@ -33,7 +42,13 @@ export async function messageAnalisator(message: IWebMessageInfo) {
         console.log(message)
         messageData.message = message.message
         return axios.post(`${urlBase}/api/messages/responses`, messageData)
-    }else if(message.message?.contactMessage){
+    }else if(WaitSurveyResponse.hasWaitSurvey(message.key.remoteJid!) && !message.key.fromMe){ // GAMBIARRA PARA O RESPOSTA DA PESQUISA
+        WaitSurveyResponse.getAndDeleteWaitSurvey(message.key.remoteJid!)
+        console.log(';;;;;;;;;;;; BOTAO RESPOSTA FAKE')
+        console.log(message)
+        messageData.message = fakeButtonMessageResponse(message)
+        return axios.post(`${urlBase}/api/messages/responses`, messageData)
+    } else if(message.message?.contactMessage){
         console.log(';;;;;;;;;;;;; RECEBIDO CONTATO')
         const vcardCuted = message.message.contactMessage.vcard!!.split('waid=')[1];
         messageData.message = {
@@ -50,6 +65,32 @@ export async function messageAnalisator(message: IWebMessageInfo) {
         messageData.message = message.message
     }
     return axios.post(`${urlBase}/api/messages`, messageData)
+}
+
+function getDiffMinutes(surveyTime: Date): number {
+    const diff = new Date().getTime() - surveyTime.getTime();
+    return Math.floor(diff / (1000 * 60));
+}
+
+function fakeButtonMessageResponse(message: IWebMessageInfo){
+    const responseText = message.message?.conversation || message.message?.extendedTextMessage?.text || 0
+    let responseNumber = 0
+    if (typeof responseText === "string") {
+        responseNumber = parseInt(responseText)
+        if(isNaN(responseNumber)){
+            responseNumber = 0
+        }
+    }
+    if(responseNumber > 3) {
+        responseNumber = 0
+    }
+    console.log(';;;;;;;;;;;;; RESPONSE NUMBER  ' + responseNumber)
+    const fakeButtonResponse ={
+        buttonsResponseMessage: {
+            selectedButtonId: responseNumber
+        }
+    }
+    return message.message['buttonsResponseMessage'] = fakeButtonResponse
 }
 
 async function audioMessage(messageData: MessageData, message: IWebMessageInfo){

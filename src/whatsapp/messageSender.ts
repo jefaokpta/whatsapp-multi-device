@@ -3,6 +3,7 @@ import {mediaFolder} from "../static/staticVar";
 import {MediaMessage} from "../model/mediaMessage";
 import {ConnectionCenter} from "./ConnectionCenter";
 import util from "util";
+import {WaitSurveyResponse} from "../static/WaitSurveyResponse";
 
 
 const exec =  util.promisify(require("child_process").exec);
@@ -17,11 +18,11 @@ export function sendTxt(message: MessageApi) {
 export function sendButtonsMessage(message: MessageApi) {
     const sock = ConnectionCenter.getSocket().sock
     // send a buttons message!
-    const buttons = [
-        {buttonId: '3', buttonText: {displayText: '😃'}, type: 1},
-        {buttonId: '2', buttonText: {displayText: '😐'}, type: 1},
-        {buttonId: '1', buttonText: {displayText: '😩'}, type: 1}
-    ]
+    // const buttons = [ // desativado por enquanto até resolver o problema do botão de opção
+    //     {buttonId: '3', buttonText: {displayText: '😃'}, type: 1},
+    //     {buttonId: '2', buttonText: {displayText: '😐'}, type: 1},
+    //     {buttonId: '1', buttonText: {displayText: '😩'}, type: 1}
+    // ]
     /**const buttonMediaMessage = { // this is a BUTTON media message
         image: {url: 'https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_960_720.jpg'},
         caption: message.btnText,
@@ -29,13 +30,16 @@ export function sendButtonsMessage(message: MessageApi) {
         buttons: buttons,
         headerType: 4
     }*/
-    const buttonMessage = {
-        text: message.btnText!!,
-        footer: message.btnFooterText,
-        buttons: buttons,
-        headerType: 1
-    }
-    sock.sendMessage (message.remoteJid, buttonMessage)
+    // const buttonMessage = { // desativado por enquanto até resolver o problema do botão de opção
+    //     text: message.btnText!!,
+    //     footer: message.btnFooterText,
+    //     buttons: buttons,
+    //     headerType: 1
+    // }
+    // sock.sendMessage (message.remoteJid, buttonMessage)
+    WaitSurveyResponse.addWaitSurvey(message.remoteJid, new Date())
+    const fakeButtonMessage = `${message.btnText} \n 3 => 😃 \n 2 => 😐 \n 1 => 😩`
+    sock.sendMessage (message.remoteJid, {text: fakeButtonMessage})
         .catch(error => console.log('ERRO AO ENVIAR BOTOES ',error))
 }
 

@@ -74,6 +74,10 @@ export const connectToWhatsApp = async () => {
             console.log('MENSAGEM DE BOTOES RECEBIDA E DESCARTADA')
             return
         }
+        if(message.message?.protocolMessage){
+            console.log('MENSAGEM DE PROTOCOLO RECEBIDA E DESCARTADA')
+            return
+        }
         messageAnalisator(message)
             .then(() => {
                 if(!message.key.fromMe){
