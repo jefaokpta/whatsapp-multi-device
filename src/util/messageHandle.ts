@@ -5,6 +5,7 @@ import {MessageData} from "../model/messageData";
 import * as fs from "fs";
 import IWebMessageInfo = proto.IWebMessageInfo;
 import {WaitSurveyResponse} from "../static/WaitSurveyResponse";
+import IMessage = proto.IMessage;
 
 export async function messageAnalisator(message: IWebMessageInfo) {
     const messageData = new MessageData(
@@ -44,7 +45,7 @@ export async function messageAnalisator(message: IWebMessageInfo) {
         return axios.post(`${urlBase}/api/messages/responses`, messageData)
     }else if(WaitSurveyResponse.hasWaitSurvey(message.key.remoteJid!) && !message.key.fromMe){ // GAMBIARRA PARA O RESPOSTA DA PESQUISA
         WaitSurveyResponse.getAndDeleteWaitSurvey(message.key.remoteJid!)
-        console.log(';;;;;;;;;;;; BOTAO RESPOSTA FAKE')
+        console.log(';;;;;;;;;;;; RECEBIDO BOTAO RESPOSTA FAKE')
         console.log(message)
         messageData.message = fakeButtonMessageResponse(message)
         return axios.post(`${urlBase}/api/messages/responses`, messageData)
@@ -85,12 +86,12 @@ function fakeButtonMessageResponse(message: IWebMessageInfo){
         responseNumber = 0
     }
     console.log(';;;;;;;;;;;;; RESPONSE NUMBER  ' + responseNumber)
-    const fakeButtonResponse ={
+const fakeButtonResponse: IMessage ={
         buttonsResponseMessage: {
-            selectedButtonId: responseNumber
+            selectedButtonId: responseNumber.toString(),
         }
-    }
-    return message.message['buttonsResponseMessage'] = fakeButtonResponse
+}
+    return fakeButtonResponse
 }
 
 async function audioMessage(messageData: MessageData, message: IWebMessageInfo){
