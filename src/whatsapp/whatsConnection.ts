@@ -92,7 +92,7 @@ export const connectToWhatsApp = async () => {
                             }).catch(err => console.log('ERRO AO MARCAR MENSAGEM COMO LIDA', err))
                     }, 5000)
                 }
-            })
+            }, err => console.log('ERRO AO ENVIAR MSG PRA API JAVA', err.message))
     })
 
     /** ATUALIZACAO DE STATUS DE MSG ENVIADA */
