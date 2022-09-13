@@ -46,6 +46,6 @@ export function confirmAuthToApi(){
             console.log('AUTH CONFIRMADA')
         })
         .catch(err => {
-            console.log('ERRO AO CONFIRMAR AUTH', err)
+            console.log('ERRO AO CONFIRMAR AUTH', err.message)
         })
 }
