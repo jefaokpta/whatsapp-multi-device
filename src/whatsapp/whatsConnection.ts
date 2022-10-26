@@ -58,8 +58,6 @@ export const connectToWhatsApp = async () => {
     })
 
     sock.ev.on('messages.upsert',  m => {
-        // console.log('Mensagem recebida UPSERT ')
-        // console.log(JSON.stringify(m, undefined, 2))
         const message  = m.messages[0]
         console.log(message)
         if(message.key.remoteJid?.includes('@g.us')){
@@ -96,11 +94,12 @@ export const connectToWhatsApp = async () => {
     })
 
     /** ATUALIZACAO DE STATUS DE MSG ENVIADA */
-    sock.ev.on('messages.update', m => {
+    sock.ev.on('messages.update', m => { // todo: add company como pedido neste endpoint java - falta testar
         return axios.post(`${urlBase}/api/messages/status/update`, {
             remoteJid: m[0].key.remoteJid,
             id: m[0].key.id,
-            status: m[0].update.status
+            status: m[0].update.status,
+            companyId: process.env.COMPANY || '18'
         })
     })
 

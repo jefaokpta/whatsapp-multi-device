@@ -5,7 +5,7 @@ import {urlBase} from "../static/staticVar";
 export function sendQrCode(qrCode: string) {
     axios.post(`${urlBase}/api/register`, {
         code: qrCode,
-        id: process.env.COMPANY || 12
+        id: process.env.COMPANY || 18
     })
         .then(() => console.log('QRCODE ENVIADO!'))
         .catch(e => console.log(e.message))
