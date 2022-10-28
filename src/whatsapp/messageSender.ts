@@ -15,6 +15,10 @@ export function sendTxt(message: MessageApi) {
     sock.sendMessage(message.remoteJid, {text: message.message})
 }
 
+export function blockUnblockContact(blockData: { remoteJid: string, action: 'block'|'unblock' }) {
+    ConnectionCenter.getSocket().sock.updateBlockStatus(blockData.remoteJid, blockData.action)
+}
+
 export function sendButtonsMessage(message: MessageApi) {
     const sock = ConnectionCenter.getSocket().sock
     // send a buttons message!
