@@ -16,6 +16,7 @@ export function sendTxt(message: MessageApi) {
 }
 
 export function blockUnblockContact(blockData: { remoteJid: string, action: 'block'|'unblock' }) {
+    console.log('BLOQUEANDO/DESBLOQUEANDO CONTATO: ', blockData)
     ConnectionCenter.getSocket().sock.updateBlockStatus(blockData.remoteJid, blockData.action)
 }
 

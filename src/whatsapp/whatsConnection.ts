@@ -99,7 +99,7 @@ export const connectToWhatsApp = async () => {
             remoteJid: m[0].key.remoteJid,
             id: m[0].key.id,
             status: m[0].update.status,
-            companyId: process.env.COMPANY || '18'
+            companyId: process.env.COMPANY || '18' // todo: verificar se sem isso quebra o sistema
         })
     })
 
