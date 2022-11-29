@@ -15,9 +15,11 @@ export function sendTxt(message: MessageApi) {
     sock.sendMessage(message.remoteJid, {text: message.message})
 }
 
-export function blockUnblockContact(blockData: { remoteJid: string, action: 'block'|'unblock' }) {
-    console.log('BLOQUEANDO/DESBLOQUEANDO CONTATO: ', blockData)
-    ConnectionCenter.getSocket().sock.updateBlockStatus(blockData.remoteJid, blockData.action)
+export async function blockUnblockContact(blockData: { remoteJid: string, action: 'block' | 'unblock' }) {
+    await ConnectionCenter.getSocket().sock.updateBlockStatus(blockData.remoteJid, blockData.action)
+
+    // .then(() => console.log('CONTATO BLOQUEADO/DESBLOQUEADO COM SUCESSO', blockData))
+    // .catch((error) => console.log('ERRO AO BLOQUEAR/DESBLOQUEAR CONTATO: ', blockData, error))
 }
 
 export function sendButtonsMessage(message: MessageApi) {

@@ -25,7 +25,7 @@ router.use('/whats/messages', messageController)
 router.use('/whats/messages/buttons', buttonMessageController)
 router.use('/whats/messages/medias', mediaMessageController)
 router.use('/whats/profile/picture', profilePicture)
-router.use('/whats/profile/block', blockContact)
+router.use('/whats/contacts/block', blockContact)
 
 router.listen(port, () => {
     console.log(`Server iniciou na porta ${port}! 🚀`);
