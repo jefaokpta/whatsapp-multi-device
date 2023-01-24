@@ -27,7 +27,7 @@ isOnWhatsapp.post('/', (req, res) => {
 
 blockContact.post('/', (req, res) => {
     blockUnblockContact(req.body)
-    res.sendStatus(200)
+    res.status(200).send()
 })
 
 buttonMessageController.post('/', (req, res) => {
