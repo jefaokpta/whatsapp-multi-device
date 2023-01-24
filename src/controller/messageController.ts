@@ -1,15 +1,28 @@
 import express from "express";
-import {blockUnblockContact, sendButtonsMessage, sendMediaMessage, sendTxt} from "../whatsapp/messageSender";
+import {
+    blockUnblockContact,
+    checkIfIsOnWhatsapp,
+    sendButtonsMessage,
+    sendMediaMessage,
+    sendTxt
+} from "../whatsapp/messageSender";
 
 
 export const messageController = express()
 export const mediaMessageController = express()
 export const buttonMessageController = express()
 export const blockContact = express()
+export const isOnWhatsapp = express()
 
 messageController.post('/', (req, res) => {
     sendTxt(req.body)
     res.sendStatus(200)
+})
+
+isOnWhatsapp.post('/', (req, res) => {
+    checkIfIsOnWhatsapp(req.body.telNumber)
+        .then((isOn) => res.send(isOn.length > 0))
+        .catch((error) => res.send(error))
 })
 
 blockContact.post('/', (req, res) => {
