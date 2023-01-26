@@ -94,12 +94,12 @@ export const connectToWhatsApp = async () => {
     })
 
     /** ATUALIZACAO DE STATUS DE MSG ENVIADA */
-    sock.ev.on('messages.update', m => { // todo: add company como pedido neste endpoint java - falta testar
+    sock.ev.on('messages.update', m => {
         return axios.post(`${urlBase}/api/messages/status/update`, {
             remoteJid: m[0].key.remoteJid,
             id: m[0].key.id,
             status: m[0].update.status,
-            companyId: process.env.COMPANY || '18' // todo: verificar se sem isso quebra o sistema
+            companyId: process.env.COMPANY || '18'
         })
     })
 
