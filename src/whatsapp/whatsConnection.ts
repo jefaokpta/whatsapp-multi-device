@@ -1,6 +1,6 @@
-import {DisconnectReason} from "@adiwajshing/baileys";
+import {DisconnectReason, useMultiFileAuthState} from "@adiwajshing/baileys";
 import {Boom} from "@hapi/boom";
-import {authFileDuplicate, confirmAuthToApi, deleteAuthFile} from "../util/authHandler";
+import {authFileDuplicate, authFileRestore, confirmAuthToApi, deleteAuthFile} from "../util/authHandler";
 import {sendQrCode} from "../util/qrCodeHandle";
 import {messageAnalisator} from "../util/messageHandle";
 import {VersionWaWeb} from "../static/versionWaWeb";
@@ -14,7 +14,9 @@ import {ConnectionCenter} from "./ConnectionCenter";
 export const connectToWhatsApp = async () => {
 
     console.log(`USANDO WA v${VersionWaWeb.version.join('.')}`)
-    const sockClass = new WhatsSocket()
+    const { state, saveCreds } = await useMultiFileAuthState(authFileRestore())
+    new AuthState(state, saveCreds) //todo: nao sei se isso é necessario
+    const sockClass = new WhatsSocket() //todo: colocar state no construtor
     const sock = sockClass.sock
 
     /** connection state has been updated -- WS closed, opened, connecting etc. */
@@ -111,21 +113,6 @@ export const connectToWhatsApp = async () => {
     })
 
     /** EVENTOS DISPONIVEIS - INUTEIS POR ENQUANTO */
-    /** set chats (history sync), chats are reverse chronologically sorted */
-    sock.ev.on('chats.set', item => {
-        console.log('RECEBENDO chats.set')
-        console.log(`recv ${item.chats.length} chats (is latest: ${item.isLatest})`)
-    })
-    /** set messages (history sync), messages are reverse chronologically sorted */
-    sock.ev.on('messages.set', item => {
-        console.log('RECEBENDO messages.set')
-        console.log(`recv ${item.messages.length} messages (is latest: ${item.isLatest})`)
-    })
-    /** set contacts (history sync) */
-    sock.ev.on('contacts.set', item => {
-        console.log('RECEBENDO contacts.set')
-        console.log(`recv ${item.contacts.length} contacts`)
-    })
 
     sock.ev.on('message-receipt.update', m => {
         console.log('RECEBENDO message-receipt.update')

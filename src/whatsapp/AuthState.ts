@@ -1,10 +1,12 @@
-import {useSingleFileAuthState} from "@adiwajshing/baileys";
-import {authFileRestore} from "../util/authHandler";
+import {AuthenticationState} from "@adiwajshing/baileys";
 
-
-const { state, saveState } = useSingleFileAuthState(authFileRestore())
 export class AuthState {
 
-    static state = state;
-    static saveState = saveState;
+    static state: AuthenticationState;
+    static saveState: () => Promise<void>;
+
+    constructor(state: AuthenticationState, saveCreds: () => Promise<void>) {
+        AuthState.state = state;
+        AuthState.saveState = saveCreds;
+    }
 }

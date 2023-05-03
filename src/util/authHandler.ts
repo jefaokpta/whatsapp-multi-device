@@ -9,7 +9,7 @@ if(urlBase.split(':').pop() === '9090'){
     authFilePath = `./auth_info_multi-${companyId}-homolog.json`
     authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}-homolog.json`
 }
-
+// todo: nao é mais um arq.json e sim uma pasta
 export function authFileRestore() {
     if (!fs.existsSync(authFilePath)) {
         try {
