@@ -1,9 +1,9 @@
 import {MessageApi} from "../model/messageApi";
 import {mediaFolder} from "../static/staticVar";
 import {MediaMessage} from "../model/mediaMessage";
-import {ConnectionCenter} from "./ConnectionCenter";
 import util from "util";
 import {WaitSurveyResponse} from "../static/WaitSurveyResponse";
+import {WhatsappSocket} from "./whatsappSocket";
 
 
 const exec =  util.promisify(require("child_process").exec);
@@ -11,24 +11,21 @@ const exec =  util.promisify(require("child_process").exec);
 const FILE_URL = `${mediaFolder}/outbox`
 
 export function sendTxt(message: MessageApi) {
-    const sock = ConnectionCenter.getSocket().sock
-    sock.sendMessage(message.remoteJid, {text: message.message})
+    WhatsappSocket.sock.sendMessage(message.remoteJid, {text: message.message})
 }
 
-export function checkIfIsOnWhatsapp(telNumber: string) {
-    const sock = ConnectionCenter.getSocket().sock
-    return sock.onWhatsApp(telNumber)
+export function checkIfIsOnWhatsapp(telNumber: string): Promise<boolean[]> {
+    return WhatsappSocket.sock.onWhatsApp(telNumber).map((isOnWhatsapp: boolean) => isOnWhatsapp)
 }
 
 export async function blockUnblockContact(blockData: { remoteJid: string, action: 'block' | 'unblock' }) {
-    await ConnectionCenter.getSocket().sock.updateBlockStatus(blockData.remoteJid, blockData.action)
+    await WhatsappSocket.sock.updateBlockStatus(blockData.remoteJid, blockData.action)
 
     // .then(() => console.log('CONTATO BLOQUEADO/DESBLOQUEADO COM SUCESSO', blockData))
     // .catch((error) => console.log('ERRO AO BLOQUEAR/DESBLOQUEAR CONTATO: ', blockData, error))
 }
 
 export function sendButtonsMessage(message: MessageApi) {
-    const sock = ConnectionCenter.getSocket().sock
     // send a buttons message!
     // const buttons = [ // desativado por enquanto até resolver o problema do botão de opção
     //     {buttonId: '3', buttonText: {displayText: '😃'}, type: 1},
@@ -51,15 +48,13 @@ export function sendButtonsMessage(message: MessageApi) {
     // sock.sendMessage (message.remoteJid, buttonMessage)
     WaitSurveyResponse.addWaitSurvey(message.remoteJid, new Date())
     const fakeButtonMessage = `${message.btnText} \n 3 => 😃 \n 2 => 😐 \n 1 => 😩`
-    sock.sendMessage (message.remoteJid, {text: fakeButtonMessage})
-        .catch(error => console.log('ERRO AO ENVIAR BOTOES ',error))
+    WhatsappSocket.sock.sendMessage (message.remoteJid, {text: fakeButtonMessage})
+        .catch((error: any) => console.log('ERRO AO ENVIAR BOTOES ',error))
 }
 
 export async function sendMediaMessage(fileUpload: MediaMessage) {
-    const sock = ConnectionCenter.getSocket().sock
-    sock.sendMessage(fileUpload.remoteJid, await messageOptions(fileUpload))
-        //.then((returnedMessage) => console.log('CABOU DE ENVIAR: ', returnedMessage))
-        .catch(error => console.log('CAGOU', error))
+    WhatsappSocket.sock.sendMessage(fileUpload.remoteJid, await messageOptions(fileUpload))
+        .catch((error: any) => console.log('CAGOU', error))
 }
 
 async function messageOptions(fileUpload: MediaMessage) {

@@ -3,41 +3,36 @@ import {mediaFolder, urlBase} from "../static/staticVar";
 import axios from "axios";
 
 const companyId = process.env.COMPANY || '18'
-let authFilePath = `./auth_info_multi-${companyId}.json`
-let authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}.json`
-if(urlBase.split(':').pop() === '9090'){
-    authFilePath = `./auth_info_multi-${companyId}-homolog.json`
-    authFilePathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}-homolog.json`
-}
-// todo: nao é mais um arq.json e sim uma pasta
-export function authFileRestore() {
-    if (!fs.existsSync(authFilePath)) {
+let authFolderPath = `./auth_info_multi-${companyId}`
+let authFolderPathBkp = `${mediaFolder}/auths/auth_info_multi-${companyId}`
+
+export function authFolderRestore() {
+    if (!fs.existsSync(authFolderPath)) {
         try {
-            fs.copyFileSync(authFilePathBkp, authFilePath)
-            console.log('ARQUIVO AUTH RESTAURADO')
-        } catch (error) {
-            console.log('NAO FOI POSSIVEL RESTAURAR ARQUIVO AUTH ', error)
+            fs.cpSync(authFolderPathBkp, authFolderPath, {recursive: true})
+            console.log('INFO: AUTH FOLDER RESTAURADO COM SUCESSO.')
+        } catch (e) {
+            console.log('ERRO: AO RESTAURAR AUTH FOLDER ', e)
         }
     }
-    return authFilePath
+    return authFolderPath
 }
 
-export function authFileDuplicate() {
-    fs.copyFile(authFilePath, authFilePathBkp, (err) => {
-        if (err) console.log('ERRO AO COPIAR AUTH FILE', err)
-        else console.log('AUTH FILE COPIADO.');
+export function authFolderDuplicate() {
+    fs.cp(authFolderPath, authFolderPathBkp, {recursive: true, force: true}, (err) => {
+        if (err) console.log('ERRO: AO DUPLICAR AUTH FOLDER', err)
     });
 }
 
-export function deleteAuthFile() {
-    fs.unlink(authFilePath, (err) => {
-        if (err) console.log('ERRO AO DELETAR AUTH FILE', err)
-        else console.log('AUTH FILE PRINCIPAL DELETADO.');
-    });
-    fs.unlink(authFilePathBkp, (err) => {
-        if (err) console.log('ERRO AO DELETAR AUTH FILE', err)
-        else console.log('AUTH FILE BACKUP DELETADO.');
-    });
+export function deleteAuthFolder() {
+    fs.rmdir(authFolderPath, (err) => {
+        if (err) console.log('ERRO: AO DELETAR AUTH FOLDER', err)
+        else console.log('INFO: AUTH FOLDER DELETADO.');
+    })
+    fs.rmdir(authFolderPathBkp, (err) => {
+        if (err) console.log('ERRO: AO DELETAR AUTH FOLDER', err)
+        else console.log('INFO: AUTH FOLDER DELETADO.');
+    })
 }
 
 export function confirmAuthToApi(){

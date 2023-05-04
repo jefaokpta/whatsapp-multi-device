@@ -1,23 +1,26 @@
-import {DisconnectReason, useMultiFileAuthState} from "@adiwajshing/baileys";
+import makeWASocket, {
+    DisconnectReason,
+    useMultiFileAuthState,
+    WAVersion
+} from "@adiwajshing/baileys";
 import {Boom} from "@hapi/boom";
-import {authFileDuplicate, authFileRestore, confirmAuthToApi, deleteAuthFile} from "../util/authHandler";
+import {authFolderDuplicate, authFolderRestore, confirmAuthToApi, deleteAuthFolder} from "../util/authHandler";
 import {sendQrCode} from "../util/qrCodeHandle";
 import {messageAnalisator} from "../util/messageHandle";
-import {VersionWaWeb} from "../static/versionWaWeb";
 import axios from "axios";
 import {urlBase} from "../static/staticVar";
-import {WhatsSocket} from "./whatsSocket";
-import {AuthState} from "./AuthState";
-import {ConnectionCenter} from "./ConnectionCenter";
+import {WhatsappSocket} from "./whatsappSocket";
 
 
-export const connectToWhatsApp = async () => {
+export const connectToWhatsApp = async (waVersion: WAVersion) => {
 
-    console.log(`USANDO WA v${VersionWaWeb.version.join('.')}`)
-    const { state, saveCreds } = await useMultiFileAuthState(authFileRestore())
-    new AuthState(state, saveCreds) //todo: nao sei se isso é necessario
-    const sockClass = new WhatsSocket() //todo: colocar state no construtor
-    const sock = sockClass.sock
+    console.log(`USANDO WA v${waVersion.join('.')}`)
+    const { state, saveCreds } = await useMultiFileAuthState(authFolderRestore())
+    const sock = makeWASocket({
+        version: waVersion,
+        auth: state,
+        printQRInTerminal: true
+    })
 
     /** connection state has been updated -- WS closed, opened, connecting etc. */
     sock.ev.on('connection.update', (update) => {
@@ -28,8 +31,9 @@ export const connectToWhatsApp = async () => {
         console.log('ESTADO DA CONEXAO ', connection)
         switch (connection) {
             case 'open':
-                ConnectionCenter.setSocket(sockClass)
+                WhatsappSocket.sock = sock
                 console.log('SISTEMA LOGADO AO WHATSAPP 👍🏼 ')
+                authFolderDuplicate()
                 confirmAuthToApi()
                 break
             case 'close':
@@ -39,13 +43,13 @@ export const connectToWhatsApp = async () => {
                 if (shouldReconnect) {
                     console.log('RECONECTANDO...')
                     setTimeout(() => {
-                        connectToWhatsApp()
+                        connectToWhatsApp(waVersion)
                     }, 5000)
                     return
                 } else{
                     console.log('SISTEMA DESLOGADO DO WHATSAPP')
                     console.log('!!! ATENCAO!!! AO LER QR CODE NAO PODE TER MENSAGENS PENDENTES')
-                    deleteAuthFile()
+                    deleteAuthFolder()
                     console.log('ARQUIVO DE AUTENTICACAO DELETADO')
                     console.log('SISTEMA SERA DESLIGADO EM 5 SEGUNDOS')
                     setTimeout(() => {
@@ -108,8 +112,8 @@ export const connectToWhatsApp = async () => {
     /** ATUALIZA ARQUIVO AUTHS */
     sock.ev.on('creds.update',  () => {
         console.log('ATUALIZANDO CREDS')
-        AuthState.saveState()
-        authFileDuplicate()
+        saveCreds().then(() => authFolderDuplicate())
+
     })
 
     /** EVENTOS DISPONIVEIS - INUTEIS POR ENQUANTO */
@@ -133,3 +137,4 @@ export const connectToWhatsApp = async () => {
         console.log(m)
     })
 }
+

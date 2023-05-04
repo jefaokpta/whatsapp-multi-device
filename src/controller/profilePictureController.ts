@@ -1,16 +1,15 @@
 import express from "express";
-import {ConnectionCenter} from "../whatsapp/ConnectionCenter";
+import {WhatsappSocket} from "../whatsapp/whatsappSocket";
 
 export const profilePicture = express()
 
 profilePicture.get('/:remoteJid', (req, res) => {
-    const sock = ConnectionCenter.getSocket().sock
-    sock.profilePictureUrl(req.params.remoteJid)
-        .then(data => {
+    WhatsappSocket.sock.profilePictureUrl(req.params.remoteJid)
+        .then((data: any) => {
             //console.log(data)
-            res.json({picture: data})
+            res.json({picture: data.toString()})
         })
-        .catch(error => {
+        .catch((error: any) => {
             console.log(error.message)
             res.status(404).json({
                 errorMessage: error.message
