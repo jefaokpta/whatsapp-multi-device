@@ -17,7 +17,7 @@ router.use(express.json())
 // run in main file
 fetchLatestBaileysVersion()
     .then(({version, isLatest}) => {
-        VersionWaWeb.version = version
+        // VersionWaWeb.version = version
         connectToWhatsApp()
     })
 
