@@ -6,7 +6,7 @@ import {
     mediaMessageController,
     messageController
 } from "./controller/messageController";
-import {fetchLatestBaileysVersion} from "@adiwajshing/baileys";
+import {fetchLatestBaileysVersion} from "@whiskeysockets/baileys";
 import {profilePicture} from "./controller/profilePictureController";
 const port = process.env.PORT || 3007
 

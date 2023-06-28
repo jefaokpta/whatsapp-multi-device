@@ -1,4 +1,4 @@
-import {downloadContentFromMessage, proto} from "@adiwajshing/baileys";
+import {downloadContentFromMessage, proto} from "@whiskeysockets/baileys";
 import axios from "axios";
 import {mediaFolder, urlBase} from "../static/staticVar";
 import {MessageData} from "../model/messageData";
