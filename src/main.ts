@@ -6,7 +6,7 @@ import {
     mediaMessageController,
     messageController
 } from "./controller/messageController";
-import {fetchLatestBaileysVersion} from "@adiwajshing/baileys";
+import {fetchLatestBaileysVersion} from "@whiskeysockets/baileys";
 import {VersionWaWeb} from "./static/versionWaWeb";
 import {profilePicture} from "./controller/profilePictureController";
 const port = process.env.PORT || 3007
@@ -18,7 +18,7 @@ router.use(express.json())
 fetchLatestBaileysVersion()
     .then(({version, isLatest}) => {
         // VersionWaWeb.version = version
-        connectToWhatsApp()
+        connectToWhatsApp(VersionWaWeb.version)
     })
 
 router.use('/whats/messages', messageController)
